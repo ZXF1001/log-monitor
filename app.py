@@ -292,8 +292,8 @@ app = create_app()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="浏览器日志查看器")
-    parser.add_argument("--host", default="127.0.0.1", help="监听地址，默认 127.0.0.1")
-    parser.add_argument("--port", type=int, default=8000, help="监听端口，默认 8000")
+    parser.add_argument("--host", default="0.0.0.0", help="监听地址，默认 0.0.0.0")
+    parser.add_argument("--port", type=int, default=19910, help="监听端口，默认 19910")
     parser.add_argument(
         "--config", type=Path,
         default=Path(os.environ.get("LOG_MONITOR_CONFIG", BASE_DIR / "config.json")),
