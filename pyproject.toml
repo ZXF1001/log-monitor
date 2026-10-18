@@ -1,0 +1,19 @@
+[project]
+name = "log-monitor"
+version = "0.1.0"
+description = "A small browser-based, read-only log viewer."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi==0.143.5",
+    "uvicorn==0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx2==2.13.1",
+    "pytest==9.1.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>日志查看器</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="/static/style.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" aria-label="日志文件">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">≋</span>
+          <div>
+            <h1>日志查看器</h1>
+            <p>LOG MONITOR</p>
+          </div>
+        </div>
+        <button class="add-button" id="open-add" type="button">
+          <span aria-hidden="true">＋</span> 添加日志
+        </button>
+        <label class="search-box"
+          ><svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="10.5" cy="10.5" r="6.5" />
+            <path d="m16 16 4 4" /></svg
+          ><input
+            id="filter"
+            type="search"
+            placeholder="搜索日志文件"
+            aria-label="搜索日志文件"
+            autocomplete="off"
+        /></label>
+        <div class="list-heading">
+          <span>日志文件</span><span id="log-count">0</span>
+        </div>
+        <nav id="log-list" class="log-list" aria-label="选择日志"></nav>
+        <p id="list-empty" class="list-empty" hidden>还没有日志文件</p>
+        <div class="sidebar-footer">
+          <span class="sync-dot" aria-hidden="true"></span
+          ><span id="list-status">配置每 5 秒自动同步</span>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="file-header">
+          <div class="file-heading">
+            <div class="title-row">
+              <h2 id="file-name">开始查看日志</h2>
+              <span class="readonly-badge">只读</span>
+            </div>
+            <p id="file-path">添加服务器上的日志文件，即可在这里查看</p>
+          </div>
+          <button class="button" id="refresh" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20 7v5h-5M4 17v-5h5" />
+              <path
+                d="M6.1 7a7 7 0 0 1 11.5-1L20 9M4 15l2.4 3a7 7 0 0 0 11.5-1"
+              /></svg
+            ><span>刷新</span>
+          </button>
+        </header>
+
+        <div
+          id="config-error"
+          class="notice notice-warning"
+          role="status"
+          hidden
+        ></div>
+        <div class="viewer-toolbar">
+          <div class="viewer-label">
+            <span class="live-dot" id="read-dot" aria-hidden="true"></span
+            ><span id="read-state">等待选择文件</span>
+          </div>
+          <div class="viewer-options">
+            <label class="check-label"
+              ><input id="auto-refresh" type="checkbox" checked />自动刷新
+              <span class="muted">2 秒</span></label
+            ><span class="toolbar-divider"></span
+            ><label class="check-label"
+              ><input id="follow" type="checkbox" checked />跟随底部</label
+            >
+          </div>
+        </div>
+        <div
+          id="read-error"
+          class="notice notice-error"
+          role="alert"
+          hidden
+        ></div>
+        <div
+          id="memory-note"
+          class="notice notice-warning"
+          role="status"
+          hidden
+        ></div>
+
+        <section class="viewer" aria-label="日志内容">
+          <div class="history-bar" id="history-bar" hidden>
+            <span id="history-description">当前显示文件末尾内容</span>
+            <div>
+              <button id="load-earlier" type="button">加载更早</button
+              ><button id="latest" type="button">回到最新 ↓</button>
+            </div>
+          </div>
+          <textarea
+            id="content"
+            readonly
+            wrap="off"
+            spellcheck="false"
+            aria-label="日志文本"
+            placeholder=""
+          ></textarea>
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path d="M14 6h14l8 8v28H12V6h2ZM28 6v10h8M19 24h10M19 31h10" />
+              </svg>
+            </div>
+            <h3 id="empty-title">让日志触手可及</h3>
+            <p id="empty-description">
+              添加日志路径，开始查看文件内容。<br />也可以直接修改后端的
+              config.json。
+            </p>
+            <button class="button button-primary" id="empty-add" type="button">
+              添加第一个日志
+            </button>
+          </div>
+        </section>
+        <footer class="statusbar">
+          <div>
+            <span id="file-size">—</span><span id="file-modified"></span>
+          </div>
+          <span id="last-read">所有操作仅查看，不修改日志文件</span>
+        </footer>
+      </main>
+    </div>
+
+    <dialog id="add-dialog" aria-labelledby="dialog-title">
+      <form id="add-form">
+        <div class="dialog-heading">
+          <h2 id="dialog-title">添加日志文件</h2>
+          <button
+            class="close-button"
+            id="close-add"
+            type="button"
+            aria-label="关闭"
+          >
+            ×
+          </button>
+        </div>
+        <p class="dialog-description">
+          填写后端所在机器上的文件路径，保存后立即生效。
+        </p>
+        <label class="field"
+          >显示名称<input
+            id="add-name"
+            name="name"
+            type="text"
+            placeholder="例如：应用日志"
+            maxlength="120"
+            required
+            autocomplete="off"
+        /></label>
+        <label class="field"
+          >日志绝对路径<input
+            id="add-path"
+            name="path"
+            type="text"
+            placeholder="/var/log/myapp/app.log"
+            required
+            autocomplete="off"
+            spellcheck="false"
+          /><span class="field-hint">Windows 示例：C:\logs\app.log</span></label
+        >
+        <p id="add-error" class="form-error" role="alert" hidden></p>
+        <div class="dialog-actions">
+          <button class="button" id="cancel-add" type="button">取消</button
+          ><button class="button button-primary" id="save-add" type="submit">
+            添加日志
+          </button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
